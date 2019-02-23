@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<canvas width="1920" height="1000"></canvas>
+<canvas width="2000" height="2000"></canvas>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 
@@ -11,10 +11,10 @@ var canvas = document.querySelector("canvas"),
 
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
-    .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter());
+    .force("charge", d3.forceManyBody().distanceMin(20).distanceMax(200))
+    .force("center", d3.forceCenter(width/2,height/2));
 
-d3.json("data.json", function(error, graph) {
+d3.json("data21.json", function(error, graph) {
   if (error) throw error;
 
   simulation
@@ -24,10 +24,17 @@ d3.json("data.json", function(error, graph) {
   simulation.force("link")
       .links(graph.links);
 
+  d3.select(canvas)
+      .call(d3.drag()
+          .container(canvas)
+          .subject(dragsubject)
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended));
+          
   function ticked() {
     context.clearRect(0, 0, width, height);
-    context.save();
-    context.translate(width / 2, height / 2 + 40);
+
 
     context.beginPath();
     graph.links.forEach(drawLink);
@@ -40,19 +47,50 @@ d3.json("data.json", function(error, graph) {
     context.strokeStyle = "#fff";
     context.stroke();
 
-    context.restore();
+    graph.nodes.forEach(addLable);
+  }
+  
+      function dragsubject() {
+    return simulation.find(d3.event.x, d3.event.y);
   }
 });
 
+
+function dragstarted() {
+  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+  d3.event.subject.fx = d3.event.subject.x;
+  d3.event.subject.fy = d3.event.subject.y;
+}
+
+function dragged() {
+  d3.event.subject.fx = d3.event.x;
+  d3.event.subject.fy = d3.event.y;
+}
+
+function dragended() {
+  if (!d3.event.active) simulation.alphaTarget(0);
+  d3.event.subject.fx = null;
+  d3.event.subject.fy = null;
+}
+
+
+function addLable(d){
+
+context.font = "10px Arial";
+context.fillText(d.id, d.x+3, d.y+6);
+
+}
+
+
 function drawLink(d) {
 
-  context.lineWidth = d.value;
+  context.lineWidth = 1;
   context.moveTo(d.source.x, d.source.y);
   context.lineTo(d.target.x, d.target.y);
 }
 
 function drawNode(d) {
-  var size =5;
+  var size =Math.log(d.value);
   context.moveTo(d.x + size, d.y);
   context.arc(d.x, d.y, size, 0, 2 * Math.PI);
 }
