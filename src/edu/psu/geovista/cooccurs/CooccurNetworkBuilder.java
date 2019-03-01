@@ -18,7 +18,7 @@ public class CooccurNetworkBuilder {
 		HashMap<String, Integer> edges = new HashMap<String, Integer>();
 
 		int i = 21;
-		String folder = "E:\\xjz5168\\Geotxt\\2017-11-27_newtweets\\";
+		String folder = "D:\\Data\\2017-11-27_newtweets\\";
 		String fileNmae = "tweettxt_Jan_" + i + ".csv";
 		String csvFile = folder + fileNmae;
 
@@ -33,6 +33,7 @@ public class CooccurNetworkBuilder {
 			for (int j = 0; j < tags.length; j++) {
 				String tag = tags[j];
 				if (nodes.containsKey(tag)) {
+//					System.out.println(tag);
 					int popularity = nodes.get(tag);
 					popularity++;
 					nodes.put(tag, popularity);
