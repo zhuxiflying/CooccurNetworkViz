@@ -11,7 +11,8 @@ var canvas = document.querySelector("canvas"),
 
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
-    .force("charge", d3.forceManyBody().distanceMin(20).distanceMax(200))
+   .force("charge", d3.forceManyBody().distanceMin(10).distanceMax(200).strength(function(){return -200;}))
+ //   .force("collide", d3.forceCollide(10))
     .force("center", d3.forceCenter(width/2,height/2));
 
 d3.json("data21.json", function(error, graph) {
@@ -34,8 +35,6 @@ d3.json("data21.json", function(error, graph) {
           
   function ticked() {
     context.clearRect(0, 0, width, height);
-
-
     context.beginPath();
     graph.links.forEach(drawLink);
     context.strokeStyle = "#aaa";
@@ -46,18 +45,17 @@ d3.json("data21.json", function(error, graph) {
     context.fill();
     context.strokeStyle = "#fff";
     context.stroke();
-
     graph.nodes.forEach(addLable);
   }
   
-      function dragsubject() {
-    return simulation.find(d3.event.x, d3.event.y);
-  }
+ //     function dragsubject() {
+ //   return simulation.find(d3.event.x, d3.event.y);
+ // }
 });
 
 
 function dragstarted() {
-  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+  if (!d3.event.active) simulation.alphaTarget(0.05).restart();
   d3.event.subject.fx = d3.event.subject.x;
   d3.event.subject.fy = d3.event.subject.y;
 }
@@ -76,15 +74,19 @@ function dragended() {
 
 function addLable(d){
 
+if(d.value>100)
+{
+  var size =Math.log(d.value);
 context.font = "10px Arial";
-context.fillText(d.id, d.x+3, d.y+6);
-
+context.fillText(d.id, d.x+size, d.y+size);
+}
 }
 
 
 function drawLink(d) {
 
-  context.lineWidth = 1;
+//  context.lineWidth = Math.log(d.value);
+  context.lineWidth =1
   context.moveTo(d.source.x, d.source.y);
   context.lineTo(d.target.x, d.target.y);
 }

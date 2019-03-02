@@ -24,22 +24,20 @@ public class CooccurNetworkBuilder {
 
 	private static HashMap<String, Integer> nodes = null;
 	private static HashMap<String, Integer> edges = null;
+	private static String dataFolder = "E:\\xjz5168\\Geotxt\\2017-11-27_newtweets\\";
+	private static String outPutFolder = "E:\\xjz5168\\Geotxt\\Data\\";
 
 	public static void main(String[] args) throws Exception {
 
 //		for (int i = 12; i < 32; i++) {
 
-
 		int i = 10;
-		String path = "E:\\xjz5168\\Geotxt\\2017-11-27_newtweets\\";
 		String name = "tweettxt_Jan_" + i + ".csv";
-		String fileName = path + name;
+		String fileName = dataFolder + name;
 
 
 		extractNetwork(fileName);
-
-		String output = "E:\\xjz5168\\Geotxt\\Data\\testedge.csv";
-		writeEdgefile(output);
+		writeCSVfile("test");
 //		writeNetworkToJSon(output);
 //		}
 
@@ -204,7 +202,22 @@ public class CooccurNetworkBuilder {
 		out.println(data.toString());
 		out.close();
 	}
+	
+	/**
+	 * The method write nodes and edges of generated network to CSV file. The method should
+	 * invoke after extractNetwork method.
+	 * @output: CSV file records nodes and edges with weight value.
+	 * @throws FileNotFoundException
+	 */
+	private static void writeCSVfile(String fileNmae) throws IOException {
+		
+		String nodeFile = outPutFolder + fileNmae +"_node.csv";
+		String edgeFile = outPutFolder + fileNmae +"_edge.csv";
+		writeNodefile(nodeFile);
+		writeEdgefile(edgeFile);
 
+	}
+	
 	/**
 	 * The method write nodes of generated network to CSV file. The method should
 	 * invoke after extractNetwork method.
