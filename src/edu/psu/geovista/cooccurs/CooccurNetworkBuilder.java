@@ -37,8 +37,8 @@ public class CooccurNetworkBuilder {
 
 
 		extractNetwork(fileName);
-		writeCSVfile("test");
-//		writeNetworkToJSon(output);
+//		writeCSVfile("test");
+		writeNetworkToJSon(outPutFolder+"test.json");
 //		}
 
 	}
@@ -116,7 +116,7 @@ public class CooccurNetworkBuilder {
 		ArrayList<JSONObject> node_json = new ArrayList<JSONObject>();
 
 		for (String edge : edges.keySet()) {
-			if (edges.get(edge) > 10) {
+			if (edges.get(edge) > 20) {
 				String[] tags = edge.split(",");
 				int frequency = edges.get(edge);
 				JSONObject jo = new JSONObject();
@@ -153,55 +153,6 @@ public class CooccurNetworkBuilder {
 		out.close();
 	}
 
-	/**
-	 * The method write generated network to JSON file. The method should invoke
-	 * after extractNetwork method. output: JSON file records nodes and edges with
-	 * weight value.
-	 * 
-	 * @throws FileNotFoundException
-	 */
-	private static void writeNetworkToCSV(String fileName) throws FileNotFoundException {
-		ArrayList<JSONObject> edge_json = new ArrayList<JSONObject>();
-		HashSet<String> nodesSet = new HashSet<String>();
-		ArrayList<JSONObject> node_json = new ArrayList<JSONObject>();
-
-		for (String edge : edges.keySet()) {
-			if (edges.get(edge) > 10) {
-				String[] tags = edge.split(",");
-				int frequency = edges.get(edge);
-				JSONObject jo = new JSONObject();
-				jo.put("source", tags[0]);
-				jo.put("target", tags[1]);
-				jo.put("value", frequency);
-				edge_json.add(jo);
-				if (!nodesSet.contains(tags[0])) {
-					nodesSet.add(tags[0]);
-					JSONObject node = new JSONObject();
-					node.put("id", tags[0]);
-					node.put("value", nodes.get(tags[0]));
-					node_json.add(node);
-				}
-				if (!nodesSet.contains(tags[1])) {
-					nodesSet.add(tags[1]);
-					JSONObject node = new JSONObject();
-					node.put("id", tags[1]);
-					node.put("value", nodes.get(tags[1]));
-					node_json.add(node);
-				}
-
-			}
-		}
-
-		JSONArray links = new JSONArray(edge_json);
-		JSONArray hashtags = new JSONArray(node_json);
-		JSONObject data = new JSONObject();
-		data.put("links", links);
-		data.put("nodes", hashtags);
-
-		PrintWriter out = new PrintWriter(fileName);
-		out.println(data.toString());
-		out.close();
-	}
 	
 	/**
 	 * The method write nodes and edges of generated network to CSV file. The method should
