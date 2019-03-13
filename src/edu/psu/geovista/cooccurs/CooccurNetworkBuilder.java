@@ -29,17 +29,23 @@ public class CooccurNetworkBuilder {
 
 	public static void main(String[] args) throws Exception {
 
-//		for (int i = 12; i < 32; i++) {
+		
 
-		int i = 10;
+		
+		for (int i = 10; i < 32; i++) {
+
 		String name = "tweettxt_Jan_" + i + ".csv";
 		String fileName = dataFolder + name;
-
+        System.out.println(fileName);
 
 		extractNetwork(fileName);
-//		writeCSVfile("test");
-		writeNetworkToJSon(outPutFolder+"test.json");
-//		}
+		
+        System.out.println("Jan"+i+","+nodes.keySet().size()+","+edges.keySet().size());
+//		writeCSVfile("Jan"+i);
+//		writeNetworkToJSon(outPutFolder+"test.json");
+		}
+		
+
 
 	}
 
@@ -51,10 +57,8 @@ public class CooccurNetworkBuilder {
 	 * @throws IOException
 	 */
 	private static void extractNetwork(String fileName) throws IOException {
-
 		nodes = new HashMap<String, Integer>();
 		edges = new HashMap<String, Integer>();
-
 		Reader in = new FileReader(fileName);
 		Iterable<CSVRecord> records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(in);
 		for (CSVRecord record : records) {
@@ -65,7 +69,7 @@ public class CooccurNetworkBuilder {
 				String[] tags = hashtags.split("\\|");
 
 				for (int j = 0; j < tags.length; j++) {
-					String tag1 = tags[j];
+					String tag1 = tags[j].toLowerCase();
 
 
 					// count the popularity of the the hashtag
@@ -79,7 +83,7 @@ public class CooccurNetworkBuilder {
 
 					// if the tweets has more than one hashtag
 					for (int k = j + 1; k < tags.length; k++) {
-						String tag2 = tags[k];
+						String tag2 = tags[k].toLowerCase();
 
 						// check both direction of the co-occurrence
 						String edge1 = tag1 + "," + tag2;
@@ -100,7 +104,6 @@ public class CooccurNetworkBuilder {
 				}
 			}
 		}
-		return;
 	}
 
 	/**
