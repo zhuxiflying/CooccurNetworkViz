@@ -23,7 +23,7 @@ import com.kennycason.kumo.nlp.FrequencyAnalyzer;
 import com.kennycason.kumo.palette.ColorPalette;
 import com.kennycason.kumo.palette.LinearGradientColorPalette;
 
-public class ViralTopicsCloud {
+public class ViralTopicsWordCloud {
 
 	private static List<WordFrequency> wordFrequencies = null;
 	private static String dataFolder = "E:\\xjz5168\\Geotxt\\Data\\";

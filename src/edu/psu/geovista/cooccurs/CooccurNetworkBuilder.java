@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -24,28 +25,31 @@ public class CooccurNetworkBuilder {
 
 	private static HashMap<String, Integer> nodes = null;
 	private static HashMap<String, Integer> edges = null;
-	private static String dataFolder = "E:\\xjz5168\\Geotxt\\2017-11-27_newtweets\\";
-	private static String outPutFolder = "E:\\xjz5168\\Geotxt\\Data\\";
+	
+//	private static String hashtag_frequecy = "E:\\xjz5168\\Geotxt\\Data\\HashtagStatistics.csv";
+//	private static String dataFolder = "E:\\xjz5168\\Geotxt\\2017-11-27_newtweets\\";
+	private static String dataFolder = "D:\\Data\\2017-11-27_newtweets\\";
+	private static String outPutFolder = "D:\\Data\\CooccurNetwork\\";
 
 	public static void main(String[] args) throws Exception {
 
-		
+		nodes = new HashMap<String, Integer>();
+		edges = new HashMap<String, Integer>();
 
 		
 		for (int i = 10; i < 32; i++) {
 
 		String name = "tweettxt_Jan_" + i + ".csv";
 		String fileName = dataFolder + name;
-        System.out.println(fileName);
+ //       System.out.println(fileName);
 
 		extractNetwork(fileName);
 		
         System.out.println("Jan"+i+","+nodes.keySet().size()+","+edges.keySet().size());
-//		writeCSVfile("Jan"+i);
-//		writeNetworkToJSon(outPutFolder+"test.json");
+
 		}
 		
-
+		writeCSVfile("all");
 
 	}
 
@@ -57,8 +61,7 @@ public class CooccurNetworkBuilder {
 	 * @throws IOException
 	 */
 	private static void extractNetwork(String fileName) throws IOException {
-		nodes = new HashMap<String, Integer>();
-		edges = new HashMap<String, Integer>();
+
 		Reader in = new FileReader(fileName);
 		Iterable<CSVRecord> records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(in);
 		for (CSVRecord record : records) {
@@ -67,11 +70,22 @@ public class CooccurNetworkBuilder {
 			// if the tweets has hashtag;
 			if (!hashtags.equals("")) {
 				String[] tags = hashtags.split("\\|");
+				
+				//convert to lower case, merge hashtag with captial letter
+//				for(int i=0;i<tags.length;i++)
+//				{
+//					tags[i] = tags[i].toLowerCase();
+//				}
+				
+				//remove duplicate
+				HashSet<String> tags_set = new HashSet<String>(Arrays.asList(tags));
+				
+				ArrayList<String> tags_list = new ArrayList<String>(tags_set);
+				
 
-				for (int j = 0; j < tags.length; j++) {
-					String tag1 = tags[j].toLowerCase();
+				for (int j=0;j<tags_list.size();j++) {
 
-
+					String tag1 = tags_list.get(j);
 					// count the popularity of the the hashtag
 					if (nodes.containsKey(tag1)) {
 						int popularity = nodes.get(tag1);

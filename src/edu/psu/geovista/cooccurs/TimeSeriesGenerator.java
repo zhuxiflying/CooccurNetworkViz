@@ -7,6 +7,8 @@ import java.io.Reader;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,9 +26,13 @@ public class TimeSeriesGenerator {
 	private static HashMap<String, int[]> hashtags_ts = null;
 	
 	// The file recorded the frequency of the hashtags
-	private static String hashtag_frequecy = "E:\\xjz5168\\Geotxt\\Data\\HashtagStatistics.csv";
-	private static String dataFolder = "E:\\xjz5168\\Geotxt\\2017-11-27_newtweets\\";
+//	private static String hashtag_frequecy = "E:\\xjz5168\\Geotxt\\Data\\HashtagStatistics.csv";
+//	private static String dataFolder = "E:\\xjz5168\\Geotxt\\2017-11-27_newtweets\\";
 
+	private static String dataFolder = "D:\\Data\\2017-11-27_newtweets\\";
+	private static String hashtagFile = "D:\\Data\\CooccurNetwork\\all_node.csv";
+
+	
 	public static void main(String[] args) throws IOException, Exception {
 
 		loadTargetHashTag();
@@ -65,11 +71,11 @@ public class TimeSeriesGenerator {
 		int frequency_threshold = 100;
 
 		targetHashtags = new HashSet<String>();
-		Reader in = new FileReader(hashtag_frequecy);
+		Reader in = new FileReader(hashtagFile);
 		Iterable<CSVRecord> records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(in);
 		for (CSVRecord record : records) {
-			String hashtags = record.get("Hashtag");
-			int frequency = Integer.valueOf(record.get("Times"));
+			String hashtags = record.get("node");
+			int frequency = Integer.valueOf(record.get("frequency"));
 			if (frequency > frequency_threshold) {
 				targetHashtags.add(hashtags);
 			}
@@ -99,9 +105,20 @@ public class TimeSeriesGenerator {
 			// if the tweets has hashtag;
 			if (!hashtags.equals("")) {
 				String[] tags = hashtags.split("\\|");
-
-				for (int j = 0; j < tags.length; j++) {
-					String tag = tags[j];
+				
+				//convert to lower case, merge hashtag with captial letter
+				for(int i=0;i<tags.length;i++)
+				{
+					tags[i] = tags[i].toLowerCase();
+				}
+				
+				//remove duplicate
+				HashSet<String> tags_set = new HashSet<String>(Arrays.asList(tags));
+				
+				ArrayList<String> tags_list = new ArrayList<String>(tags_set);
+				
+				for (int j = 0; j < tags_list.size(); j++) {
+					String tag = tags_list.get(j);
 
 					// if the hashtag contained in the target hashtag set
 					if (targetHashtags.contains(tag)) {
