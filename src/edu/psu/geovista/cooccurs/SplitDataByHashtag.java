@@ -22,7 +22,7 @@ public class SplitDataByHashtag {
 	private static String dataFolder = "D:\\Data\\2017-11-27_newtweets\\";
 	private static String outFolder = "D:\\Data\\Hashtags\\";
 	private static String hashtagFile = "D:\\Data\\CooccurNetwork\\all_node.csv";
-	
+
 	private static HashSet<String> targetHashtags = null;
 	private static HashMap<String, ArrayList<String[]>> hashtag_tweets = null;
 
@@ -42,17 +42,7 @@ public class SplitDataByHashtag {
 
 			splitTweets(fileName, outFolder);
 
-//        System.out.println("Jan"+i+","+nodes.keySet().size()+","+edges.keySet().size());
-
 		}
-
-//		for (String hashtag : hashtag_tweets.keySet()) {
-//			System.out.println(hashtag + "," + hashtag_tweets.get(hashtag).size());
-//		}
-
-		// create folder
-		File dir = new File(outFolder);
-		dir.mkdir();
 
 		// write tweets by hashtag
 		for (String hashtag : hashtag_tweets.keySet()) {
