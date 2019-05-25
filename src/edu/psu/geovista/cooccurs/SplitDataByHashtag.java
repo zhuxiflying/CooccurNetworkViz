@@ -38,8 +38,6 @@ public class SplitDataByHashtag {
 			String name = "tweettxt_Jan_" + i + ".csv";
 			String fileName = dataFolder + name;
 			String outFolder = dataFolder + "\\Jan_" + i;
-			System.out.println(fileName);
-
 			splitTweets(fileName, outFolder);
 
 		}
