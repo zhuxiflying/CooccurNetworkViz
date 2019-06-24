@@ -39,21 +39,12 @@ public class SplitDataByHashtag {
 			String fileName = dataFolder + name;
 			String outFolder = dataFolder + "\\Jan_" + i;
 			splitTweets(fileName, outFolder);
-
 		}
 
 		// write tweets by hashtag
+		
 		for (String hashtag : hashtag_tweets.keySet()) {
-			FileWriter out = new FileWriter(outFolder + hashtag + ".csv");
-			CSVPrinter printer = CSVFormat.DEFAULT
-					.withHeader("User_id", "Tweet_text", "Time_of_tweet", "URLs_in_text", "Hashtags_in_text")
-					.print(out);
-			ArrayList<String[]> tweets = hashtag_tweets.get(hashtag);
-
-			for (String[] tw : tweets) {
-				printer.printRecord(tw);
-			}
-			out.close();
+			writeTweetsByHashtag(hashtag);
 		}
 
 	}
@@ -128,5 +119,23 @@ public class SplitDataByHashtag {
 				targetHashtags.add(hashtags);
 			}
 		}
+	}
+	
+	
+	/**
+	 * write tweets with same hashtag into a individual file;
+	 */
+	private static void writeTweetsByHashtag(String hashtag) throws IOException
+	{
+		FileWriter out = new FileWriter(outFolder + hashtag + ".csv");
+		CSVPrinter printer = CSVFormat.DEFAULT
+				.withHeader("User_id", "Tweet_text", "Time_of_tweet", "URLs_in_text", "Hashtags_in_text")
+				.print(out);
+		ArrayList<String[]> tweets = hashtag_tweets.get(hashtag);
+
+		for (String[] tw : tweets) {
+			printer.printRecord(tw);
+		}
+		out.close();
 	}
 }
