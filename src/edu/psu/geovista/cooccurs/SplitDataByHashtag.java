@@ -1,6 +1,5 @@
 package edu.psu.geovista.cooccurs;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,7 +20,7 @@ public class SplitDataByHashtag {
 
 	private static String dataFolder = "D:\\Data\\2017-11-27_newtweets\\";
 	private static String outFolder = "D:\\Data\\Hashtags\\";
-	private static String hashtagFile = "D:\\Data\\CooccurNetwork\\all_node.csv";
+	private static String hashtagFile = "D:\\Data\\CooccurNetwork\\HashtagStatistics.csv";
 
 	private static HashSet<String> targetHashtags = null;
 	private static HashMap<String, ArrayList<String[]>> hashtag_tweets = null;
@@ -41,8 +40,19 @@ public class SplitDataByHashtag {
 			splitTweets(fileName, outFolder);
 		}
 
+		//hashtag statistic
+//		for (String hashtag : hashtag_tweets.keySet()) {
+////			int count = countUsers(hashtag);
+////			int count_hashtag = countCoocurHashtags(hashtag);
+////			System.out.println(hashtag+","+hashtag_tweets.get(hashtag).size()+","+count+","+count_hashtag);
+////			HashMap<String,Integer> hashtag_num = countEdgeUser(hashtag);
+//			for(String tags:hashtag_num.keySet())
+//			{
+//				System.out.println(tags+","+hashtag_num.get(tags));
+//			}
+//		}
+
 		// write tweets by hashtag
-		
 		for (String hashtag : hashtag_tweets.keySet()) {
 			writeTweetsByHashtag(hashtag);
 		}
@@ -113,29 +123,82 @@ public class SplitDataByHashtag {
 		Reader in = new FileReader(hashtagFile);
 		Iterable<CSVRecord> records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(in);
 		for (CSVRecord record : records) {
-			String hashtags = record.get("node");
-			int frequency = Integer.valueOf(record.get("frequency"));
-			if (frequency > frequency_threshold) {
+			String hashtags = record.get("hashtag");
+			int frequency = Integer.valueOf(record.get("users"));
+			if (frequency >= frequency_threshold) {
 				targetHashtags.add(hashtags);
 			}
 		}
 	}
 	
-	
+
 	/**
 	 * write tweets with same hashtag into a individual file;
 	 */
-	private static void writeTweetsByHashtag(String hashtag) throws IOException
-	{
+	private static void writeTweetsByHashtag(String hashtag) throws IOException {
 		FileWriter out = new FileWriter(outFolder + hashtag + ".csv");
 		CSVPrinter printer = CSVFormat.DEFAULT
-				.withHeader("User_id", "Tweet_text", "Time_of_tweet", "URLs_in_text", "Hashtags_in_text")
-				.print(out);
+				.withHeader("User_id", "Tweet_text", "Time_of_tweet", "URLs_in_text", "Hashtags_in_text").print(out);
 		ArrayList<String[]> tweets = hashtag_tweets.get(hashtag);
 
 		for (String[] tw : tweets) {
 			printer.printRecord(tw);
 		}
 		out.close();
+	}
+
+	/**
+	 * count the number of users adopting the hashtag;
+	 */
+	private static int countUsers(String hashtag) {
+		HashSet<String> users = new HashSet<String>();
+		ArrayList<String[]> tweets = hashtag_tweets.get(hashtag);
+
+		for (String[] tw : tweets) {
+			users.add(tw[0]);
+		}
+
+		return users.size();
+	}
+	
+	/**
+	 * count the number of hashtags co-ocuring with the target hashtag;
+	 */
+	private static int countCoocurHashtags(String hashtag) {
+		HashSet<String> hashtags = new HashSet<String>();
+		ArrayList<String[]> tweets = hashtag_tweets.get(hashtag);
+
+		for (String[] tw : tweets) {
+			String tags = tw[4];
+			String[] tag = tags.split("\\|");
+			for(String t:tag)
+			hashtags.add(t);
+		}
+		return hashtags.size();
+	}
+	
+	
+	private static HashMap<String,Integer> countEdgeUser(String hashtag)
+	{
+		HashMap<String,Integer> hashtag_userCount = new HashMap<String,Integer>();
+		HashMap<String,HashSet<String>> hashtag_users = new HashMap<String,HashSet<String>>();
+		ArrayList<String[]> tweets = hashtag_tweets.get(hashtag);
+
+		for (String[] tw : tweets) {
+			String tags = tw[4];
+			String userid = tw[0];
+			String[] tag = tags.split("\\|");
+			for(String t:tag)
+			{
+				hashtag_users.get(t).add(userid);
+			}
+		}
+		
+		for(String tag:hashtag_users.keySet())
+		{
+			hashtag_userCount.put(tag, hashtag_users.get(tag).size());
+		}
+		return hashtag_userCount;
+		
 	}
 }
