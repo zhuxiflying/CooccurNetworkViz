@@ -1,6 +1,7 @@
 package edu.psu.geovista.cooccurs;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,18 +21,19 @@ import org.apache.commons.csv.CSVRecord;
 public class HashtagStatistics {
 
 	// private static String dataFolder = "D:\\Data\\2017-11-27_newtweets\\";
-	private static String dataFolder = "D:\\data\\geotwitter01_1\\New folder\\";
-	private static String outputFolder = "D:\\data\\geotwitter\\hashtag_frequency\\";
+	private static String dataFolder = "D:\\data\\geotwitter01_hashtag\\";
+	private static String outputFolder = "D:\\data\\geotwitter\\hashtag_users\\";
 	private static HashMap<String, Integer> hashtag_frequency = null;
 	private static HashMap<String, HashSet<String>> hashtag_users = null;
 	private static HashMap<String, HashSet<String>> hashtag_degree = null;
 
 	public static void main(String[] args) throws IOException {
-
+		
 		File f = new File(dataFolder);
 		for (final File fileEntry : f.listFiles()) {
 			String fileName = fileEntry.getName();
-			countFreqency(fileName, fileName);
+			countUsers(fileName, fileName);
+			System.out.println(fileName);
 		}
 	}
 
@@ -50,7 +52,7 @@ public class HashtagStatistics {
 			count++;
 			String hashtags = record.get("Hashtags_in_text");
 			String userid = record.get("User_id");
-			
+
 			// if the tweets has hashtag;
 			if (!hashtags.equals("")) {
 				String[] tags = hashtags.split("\\|");
@@ -84,60 +86,58 @@ public class HashtagStatistics {
 		}
 		System.out.println(input + "," + count);
 
-//		FileWriter out = new FileWriter(outputFolder + output);
-//		CSVPrinter printer = CSVFormat.DEFAULT.withHeader("Hashtag", "Frequency","Users").print(out);
-//		for (String hashtag : hashtag_frequency.keySet()) {
-//			printer.printRecord(hashtag , hashtag_frequency.get(hashtag),hashtag_users.get(hashtag).size());
-//		}
-//		out.close();
-		
+		FileWriter out = new FileWriter(outputFolder + output);
+		CSVPrinter printer = CSVFormat.DEFAULT.withHeader("Hashtag", "Frequency", "Users").print(out);
+		for (String hashtag : hashtag_frequency.keySet()) {
+			printer.printRecord(hashtag, hashtag_frequency.get(hashtag), hashtag_users.get(hashtag).size());
+		}
+		out.close();
+
 	}
 
 	/*
 	 * count number of users
 	 */
-	private static void countUsers() throws IOException {
+	private static void countUsers(String input, String output) throws IOException {
+		
 		hashtag_users = new HashMap<String, HashSet<String>>();
 
-		for (int i = 10; i < 32; i++) {
-			String name = "tweettxt_Jan_" + i + ".csv";
-			String fileName = dataFolder + name;
-			Reader in = new FileReader(fileName);
-			Iterable<CSVRecord> records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(in);
-			for (CSVRecord record : records) {
+		Reader in = new FileReader(dataFolder + input);
+		Iterable<CSVRecord> records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(in);
+		for (CSVRecord record : records) {
 
-				String hashtags = record.get("Hashtags_in_text");
-				String userid = record.get("User_id");
-				// if the tweets has hashtag;
-				if (!hashtags.equals("")) {
-					String[] tags = hashtags.split("\\|");
+			String hashtags = record.get("Hashtags_in_text");
+			String userid = record.get("User_id");
+			// if the tweets has hashtag;
+			if (!hashtags.equals("")) {
+				String[] tags = hashtags.split("\\|");
+				// remove duplicate
+				HashSet<String> tags_set = new HashSet<String>(Arrays.asList(tags));
+				ArrayList<String> tags_list = new ArrayList<String>(tags_set);
 
-					// remove duplicate
-					HashSet<String> tags_set = new HashSet<String>(Arrays.asList(tags));
-					ArrayList<String> tags_list = new ArrayList<String>(tags_set);
-
-					for (int j = 0; j < tags_list.size(); j++) {
-						String tag1 = tags_list.get(j);
-						// count the users of the hashtag
-						if (hashtag_users.containsKey(tag1)) {
-							HashSet<String> users = hashtag_users.get(tag1);
-							users.add(userid);
-							hashtag_users.put(tag1, users);
-						} else {
-							HashSet<String> users = new HashSet<String>();
-							users.add(userid);
-							hashtag_users.put(tag1, users);
-						}
-
+				for (int j = 0; j < tags_list.size(); j++) {
+					String tag1 = tags_list.get(j);
+					// count the users of the hashtag
+					if (hashtag_users.containsKey(tag1)) {
+						HashSet<String> users = hashtag_users.get(tag1);
+						users.add(userid);
+						hashtag_users.put(tag1, users);
+					} else {
+						HashSet<String> users = new HashSet<String>();
+						users.add(userid);
+						hashtag_users.put(tag1, users);
 					}
 				}
 			}
 		}
-
+		
+		FileWriter out = new FileWriter(outputFolder + output);
+		CSVPrinter printer = CSVFormat.DEFAULT.withHeader("Hashtag", "Users").print(out);
 		for (String hashtag : hashtag_users.keySet()) {
-			System.out.println(hashtag + "," + hashtag_users.get(hashtag).size());
+			for(String userid: hashtag_users.get(hashtag))
+			printer.printRecord(hashtag,  userid);
 		}
-
+		out.close();
 	}
 
 	/*
@@ -227,6 +227,31 @@ public class HashtagStatistics {
 		// printer2.printRecord(degree, degree_distribution.get(degree));
 		// }
 		// out2.close();
+
+	}
+
+	/*
+	 * construct a new dataset only contains tweets with hashtag
+	 */
+	private static void simiplfyData(String input, String output) throws IOException {
+		int count = 0;
+		Reader in = new FileReader(dataFolder + input);
+		Iterable<CSVRecord> records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(in);
+		FileWriter out = new FileWriter(outputFolder + output);
+		CSVPrinter printer = CSVFormat.DEFAULT.withHeader("Tweet_id", "Time_of_tweet", "User_id", "Tweet_text",
+				"Hashtags_in_text", "x", "y", "Place_id", "Place_type", "Place_full_name", "Place_name", "Country_code",
+				"Country", "place_centroid_x", "place_centroid_y").print(out);
+		for (CSVRecord record : records) {
+
+			String hashtags = record.get("Hashtags_in_text");
+			// if the tweets has hashtag;
+			if (!hashtags.equals("")) {
+				count++;
+				printer.printRecord(record);
+			}
+		}
+		out.close();
+		System.out.println(input + "," + count);
 
 	}
 }
